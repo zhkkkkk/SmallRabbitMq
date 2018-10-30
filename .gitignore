@@ -1,0 +1,12 @@
+.idea/
+*.classpath
+*.class
+.project
+*.settings
+*.prefs
+ltapi-biz/bin/
+.settings/
+target/
+*.iml
+*.cmd
+*.gitignore.bak
