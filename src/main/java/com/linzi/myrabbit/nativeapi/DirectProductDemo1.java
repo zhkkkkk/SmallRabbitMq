@@ -1,20 +1,18 @@
-package com.linzi.myrabbit.main;
-
+package com.linzi.myrabbit.nativeapi;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
 /**
  * @Auther: zhuhuakun
- * @Date: 2018/10/30 14:09
- * @Description: main方法发送消息
+ * @Date: 2018/10/30 16:15
+ * @Description:
  */
-public class ProductsDemo1 {
+public class DirectProductDemo1 {
     public static void main(String[] args) throws Exception {
         // 创建连接工厂
         ConnectionFactory connectionFactory = new ConnectionFactory();
@@ -24,14 +22,16 @@ public class ProductsDemo1 {
         connectionFactory.setUsername("guest");
         connectionFactory.setPassword("guest");
 
-        // 获取连接
         Connection connection = connectionFactory.newConnection();
-        // 创建channel通道
         Channel channel = connection.createChannel();
 
-        // exchange为空的话 发送消息到default exchange中, 该交换机将消息路由到routingKey与消息队列名称一致的队列中
-        for (int i = 0; i < 5; i++) {
-            channel.basicPublish("", "test001", null, "Hello main RabbbitMq!".getBytes());
+        String exchangeName = "direct_native_exchange_test";
+        String routingKey = "direct.native.route";
+
+        String msg = "RabbitMQ_direct exchange";
+        // 发送消息
+        for (int i = 0; i < 10; i++) {
+            channel.basicPublish(exchangeName, routingKey, null, msg.getBytes());
         }
 
         channel.close();

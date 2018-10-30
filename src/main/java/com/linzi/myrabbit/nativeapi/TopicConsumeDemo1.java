@@ -1,19 +1,18 @@
-package com.linzi.myrabbit.main;
+package com.linzi.myrabbit.nativeapi;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.QueueingConsumer;
 
-import java.util.HashMap;
-
 /**
  * @Auther: zhuhuakun
- * @Date: 2018/10/30 14:09
- * @Description: main方法发送消息
+ * @Date: 2018/10/30 16:15
+ * @Description:
  */
-public class ConsumeDemo1 {
+public class TopicConsumeDemo1 {
     public static void main(String[] args) throws Exception {
+        // 创建连接工厂
         ConnectionFactory connectionFactory = new ConnectionFactory();
         connectionFactory.setHost("192.168.137.88");
         connectionFactory.setPort(5672);
@@ -24,22 +23,26 @@ public class ConsumeDemo1 {
         Connection connection = connectionFactory.newConnection();
         Channel channel = connection.createChannel();
 
-        // 定义队列
-        String queueName = "test001";
-        channel.queueDeclare(queueName, true, false, false, new HashMap<>());
+        String exchangeName = "topic_native_exchange_test";
+        String exchangeType = "topic";
+        String routingKey1 = "topic.native.*";
+        String queueName1 = "topic_native_queue_test1";
 
-        // 创建消费者
+        // 声明交换机/队列/绑定关系
+        channel.exchangeDeclare(exchangeName, exchangeType, true, false, false, null);
+
+        channel.queueDeclare(queueName1, true, false, false, null);
+
+        channel.queueBind(queueName1, exchangeName, routingKey1);
+
+        // 定义消费者 并绑定队列
         QueueingConsumer queueingConsumer = new QueueingConsumer(channel);
-        // 消费者监听队列 自动确认消息
-        channel.basicConsume(queueName, true, queueingConsumer);
+        channel.basicConsume(queueName1, true, queueingConsumer);
 
         while (true) {
-            // 阻塞获取消息
             QueueingConsumer.Delivery delivery = queueingConsumer.nextDelivery();
             String msg = new String(delivery.getBody());
-
-            System.out.println("消费者消费消息 ===> " + msg);
+            System.out.println("原生api==topic模式 Consumer1 接收消息 ===> " + msg);
         }
-
     }
 }
