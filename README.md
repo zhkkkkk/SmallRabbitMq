@@ -1,0 +1,1 @@
+个人针对RabbitMq做的一些练习测试, 涵盖了RabbitMq的原生API的使用,以及与Spring-boot结合的使用。
