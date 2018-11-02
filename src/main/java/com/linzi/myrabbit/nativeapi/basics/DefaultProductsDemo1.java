@@ -1,4 +1,4 @@
-package com.linzi.myrabbit.nativeapi;
+package com.linzi.myrabbit.nativeapi.basics;
 
 
 import com.rabbitmq.client.AMQP;

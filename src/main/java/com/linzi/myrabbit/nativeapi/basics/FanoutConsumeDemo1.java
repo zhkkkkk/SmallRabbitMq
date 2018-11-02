@@ -1,18 +1,19 @@
-package com.linzi.myrabbit.nativeapi;
+package com.linzi.myrabbit.nativeapi.basics;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.QueueingConsumer;
 
+import java.util.HashMap;
+
 /**
  * @Auther: zhuhuakun
- * @Date: 2018/10/30 16:15
- * @Description:
+ * @Date: 2018/10/30 14:09
+ * @Description: main方法发送消息
  */
-public class TopicConsumeDemo1 {
+public class FanoutConsumeDemo1 {
     public static void main(String[] args) throws Exception {
-        // 创建连接工厂
         ConnectionFactory connectionFactory = new ConnectionFactory();
         connectionFactory.setHost("192.168.137.88");
         connectionFactory.setPort(5672);
@@ -23,26 +24,27 @@ public class TopicConsumeDemo1 {
         Connection connection = connectionFactory.newConnection();
         Channel channel = connection.createChannel();
 
-        String exchangeName = "topic_native_exchange_test";
-        String exchangeType = "topic";
-        String routingKey1 = "topic.native.*";
-        String queueName1 = "topic_native_queue_test1";
+        // 定义队列
+        String queueName = "fanout_native_queue_test";
+        String exchangeName = "fanout_native_exchange_test";
+        String type = "fanout";
 
-        // 声明交换机/队列/绑定关系
-        channel.exchangeDeclare(exchangeName, exchangeType, true, false, false, null);
+        channel.queueDeclare(queueName, true, false, false, new HashMap<>());
+        channel.exchangeDeclare(exchangeName, type, true, false, false, null);
+        channel.queueBind(queueName, exchangeName, "");
 
-        channel.queueDeclare(queueName1, true, false, false, null);
-
-        channel.queueBind(queueName1, exchangeName, routingKey1);
-
-        // 定义消费者 并绑定队列
+        // 创建消费者
         QueueingConsumer queueingConsumer = new QueueingConsumer(channel);
-        channel.basicConsume(queueName1, true, queueingConsumer);
+        // 消费者监听队列 自动确认消息
+        channel.basicConsume(queueName, true, queueingConsumer);
 
         while (true) {
+            // 阻塞获取消息
             QueueingConsumer.Delivery delivery = queueingConsumer.nextDelivery();
             String msg = new String(delivery.getBody());
-            System.out.println("原生api==topic模式 Consumer1 接收消息 ===> " + msg);
+
+            System.out.println("fanout模式 消费者消费消息 ===> " + msg);
         }
+
     }
 }
